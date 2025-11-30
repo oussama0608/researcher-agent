@@ -12,6 +12,8 @@ frontend/.vite/
 # IDE / OS
 .DS_Store
 *.log
+*.json
+
 
 # Coverage / build artifacts
 .coverage
