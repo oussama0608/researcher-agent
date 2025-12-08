@@ -13,10 +13,20 @@ function StatusPill({ status }) {
     idle: { text: "Idle", className: "pill pill-neutral" },
     running: { text: "Researching…", className: "pill pill-active" },
     ready: { text: "Ready for approval", className: "pill pill-ready" },
-    sent: { text: "Mock sent", className: "pill pill-sent" },
+    sent: { text: "Mock sent ✓", className: "pill pill-sent" },
   };
   const data = palette[status] || palette.idle;
   return <span className={data.className}>{data.text}</span>;
+}
+
+function DownloadIcon() {
+  return (
+    <svg className="download-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <polyline points="7 10 12 15 17 10" />
+      <line x1="12" y1="15" x2="12" y2="3" />
+    </svg>
+  );
 }
 
 function App() {
@@ -70,6 +80,30 @@ function App() {
     }
     setSendMessage("Mock send complete. (Hook your email API here.)");
     setStatus("sent");
+  };
+
+  const handleDownload = () => {
+    if (!summary && !emailDraft) {
+      return;
+    }
+    const content = `# Research Results for ${form.company}
+Generated: ${new Date().toLocaleString()}
+
+## Summary
+${summary || "No summary available."}
+
+## Email Draft
+${emailDraft || "No email draft available."}
+`;
+    const blob = new Blob([content], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${form.company.replace(/\s+/g, "_")}_outreach.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -191,7 +225,16 @@ function App() {
                 <button type="button" className="primary-btn" onClick={handleSend} disabled={!emailDraft}>
                   Approve & mock send
                 </button>
-                {sendMessage && <p className="muted">{sendMessage}</p>}
+                <button
+                  type="button"
+                  className="secondary-btn"
+                  onClick={handleDownload}
+                  disabled={!summary && !emailDraft}
+                >
+                  <DownloadIcon />
+                  Download
+                </button>
+                {sendMessage && <p className="success-message">✓ {sendMessage}</p>}
               </div>
             </div>
           </div>
